@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{%  import 'bootstrap/wtf.html' as wtf %}
+
+<html lang="en">
+{% block app_content %}
+    <h1> Hello, {{ current_user.username }}!</h1>
+    {% if form %}
+        <div class="row">
+            <div class="col-md-4">
+                {{ wtf.quick_form(form) }}
+            </div>
+        </div>
+    {% endif %}<br>
+
+    <table class="table table-sm table-striped table-hover">
+    <thead>
+    <tr>
+        <th scope="col">date</th>
+        <th scope="col">price</th>
+        <th scope="col">business</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for p in purchases %}
+            {% include '_purchase.html' %}
+        {% endfor %}
+    </tbody>
+    </table>
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span> Newer posts
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    Older posts <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}
