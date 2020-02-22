@@ -5,33 +5,36 @@ from numpy import argwhere
 from sqlalchemy.sql.functions import user
 
 from app import db
-from app.models import User,Purchase
+from app.models import User, Purchase, Category
 import pandas as pd
 import os
 from os.path import join as pjoin
 import currency
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-datadir = pjoin(os.path.dirname(basedir),'sample_data')
-files = os.listdir(datadir,)
+datadir = pjoin(os.path.dirname(basedir), 'sample_data')
+files = os.listdir(datadir, )
 c = CurrencyConverter()
 USD2ILS = c.convert(1, 'USD', 'ILS')
 
 Purchase.query.delete()
 db.session.commit()
 
-for filename in files:
-    df = pd.read_excel(pjoin(datadir,filename))
-    user_name = 'noam' if df.loc[0].values[0] == 'כהן נעם' else 'eden'
-    charge_date = df.iloc[1,2]
 
-    df = df.iloc[2:,:-1]
-    israel_placeholder = argwhere(df.iloc[:,0] == 'עסקאות בארץ')[0][0]
-    abroad_placeholder = argwhere(df.iloc[:,0] == 'עסקאות בחו˝ל')[0][0]
-    df_isr_colname = df.iloc[israel_placeholder+1].values
-    df_abroad_colname = df.iloc[abroad_placeholder+1].values
+#region Purchases
+
+for filename in files:
+    df = pd.read_excel(pjoin(datadir, filename))
+    user_name = 'noam' if df.loc[0].values[0] == 'כהן נעם' else 'eden'
+    charge_date = df.iloc[1, 2]
+
+    df = df.iloc[2:, :-1]
+    israel_placeholder = argwhere(df.iloc[:, 0] == 'עסקאות בארץ')[0][0]
+    abroad_placeholder = argwhere(df.iloc[:, 0] == 'עסקאות בחו˝ל')[0][0]
+    df_isr_colname = df.iloc[israel_placeholder + 1].values
+    df_abroad_colname = df.iloc[abroad_placeholder + 1].values
     old_colname = df.columns.values
-    translate_dict = {'תאריך רכישה' : 'purchase_date'
+    translate_dict = {'תאריך רכישה': 'purchase_date'
         , 'תאריך חיוב': 'billing_date'
         , 'סכום עסקה': 'price'
         , 'מספר שובר': 'purchase_id'
@@ -44,9 +47,9 @@ for filename in files:
     new_abroad_colname = dict(zip(old_colname, [translate_dict[x] for x in list(df_abroad_colname)]))
     new_isr_colname = dict(zip(old_colname, [translate_dict[x] for x in list(df_isr_colname)]))
 
-    df_israel_purchase = df.iloc[israel_placeholder+2:abroad_placeholder-1,:]
-    df_abroad_purchase = df.iloc[abroad_placeholder+2:-2,:]
-    df_israel_purchase.rename(columns=new_isr_colname,inplace=True)
+    df_israel_purchase = df.iloc[israel_placeholder + 2:abroad_placeholder - 1, :]
+    df_abroad_purchase = df.iloc[abroad_placeholder + 2:-2, :]
+    df_israel_purchase.rename(columns=new_isr_colname, inplace=True)
     df_abroad_purchase.rename(columns=new_abroad_colname, inplace=True)
 
     existing_users = db.session.query(User.username).all()
@@ -61,9 +64,9 @@ for filename in files:
     # for Israeli purchases
     for k, row in df_israel_purchase.iterrows():
         p = Purchase(business_name=row['business_name']
-                     , date= datetime.strptime(row['purchase_date'],"%d/%m/%Y").date()
-                     , price = float(row['price'])
-                     , payment_price = float(row['payment_price'])
+                     , date=datetime.strptime(row['purchase_date'], "%d/%m/%Y").date()
+                     , price=float(row['price'])
+                     , payment_price=float(row['payment_price'])
                      , buyer=u)
         db.session.merge(p)
         db.session.commit()
@@ -77,3 +80,59 @@ for filename in files:
                      , buyer=u)
         db.session.merge(p)
         db.session.commit()
+
+#endregion
+
+#region Categories
+
+CATEGORIES = [
+    ('Food work', 1)
+    , ('Climbing', 1)
+    , ('Goalball', 1)
+    , ('Clothing', 1)
+    , ('Memberships', 1)
+    , ('Personal leisure', 1)
+    , ('Startup expenses', 1)
+
+    , ('Diet', 2)
+    , ('Clothing', 2)
+    , ('Personal leisure', 2)
+    , ('Food work', 2)
+
+    , ('Mutual leisure',)
+    , ('Gasoline',)
+    , ('Transport',)
+    , ('Cash',)
+    , ('Groceries',)
+    , ('Haircuts, medicine and cosmetics',)
+    , ('Work insurance',)
+    , ('Car expenses',)
+    , ('Car insurance',)
+    , ('Vacation',)
+    , ('Dental',)
+    , ('Weddings',)
+    , ('Household',)
+    , ('Goodies',)
+    , ('Events & Concerts',)
+    , ('Accountant US taxes',)
+    , ('Car test',)
+
+    , ('Bills electricity',)
+    , ('Bills arnona',)
+    , ('Bills water',)
+    , ('Internet',)
+    , ('Rent',)
+    , ('HaOgen (house holding)',)
+
+]
+
+for c in CATEGORIES:
+    if len(c) > 1:
+        cname, cid = c
+    else:
+        cname, cid = c[0], None
+    cat = Category(category=cname, user_id=cid)
+    db.session.merge(cat)
+    db.session.commit()
+
+#endregion

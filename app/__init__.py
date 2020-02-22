@@ -2,8 +2,10 @@ import logging
 import os
 from logging.handlers import SMTPHandler, RotatingFileHandler
 
+import googlemaps
 from flask import Flask, render_template, flash, redirect, url_for
 from flask_mail import Mail
+from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from flask_migrate import Migrate
@@ -17,6 +19,8 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 mail = Mail(app)
+moment = Moment(app)
+gmaps = googlemaps.Client(key=app.config['GOOGLE_MAPS_KEY'])
 bootstrap = Bootstrap(app)
 
 from app import routes, models, forms, errors

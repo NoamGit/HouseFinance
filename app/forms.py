@@ -1,11 +1,20 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField \
-    , SubmitField, FloatField
+    , SubmitField, FloatField, TextAreaField, SelectField
 from wtforms.fields.html5 import DateField
 
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length, Optional
 
 from app.models import User
+
+
+class CategoryForm(FlaskForm):
+    # categories = [('food',3),('insurance',4)]
+    # category = SelectField(choices=categories)
+
+    def append_field(self, name, field):
+        setattr(self, name, field)
+        return self
 
 
 class EditProfileForm(FlaskForm):

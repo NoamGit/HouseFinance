@@ -45,6 +45,16 @@ class User(UserMixin, db.Model):
         return f"<User {self.username}>"
 
 
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(64), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    purchase = db.relationship('Purchase', backref='business_category', lazy='dynamic')
+
+    def __repr__(self):
+        return f"<Category {self.category}::{self.purchase}>"
+
+
 class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     business_name = db.Column(db.String(128), nullable=False)
@@ -52,6 +62,10 @@ class Purchase(db.Model):
     price = db.Column(db.Float, nullable=True)
     payment_price = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    category = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
+
+    def set_category(self, category_id:int):
+        self.category = category_id
 
     def __repr__(self):
         return f"<Purchase {self.date}::{self.business_name}::{self.price}>"

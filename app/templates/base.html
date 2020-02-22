@@ -1,5 +1,23 @@
 {% extends 'bootstrap/base.html' %}
 
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
+
+    <script>
+        function findplace(sourceElem, destElem) {
+            $(destElem).html('<img src="{{ url_for('static', filename='loading_gif.gif' ) }}" width="80" height="80">');
+            $.post('/findplace', {
+                text: $(sourceElem).text()
+            }).done(function(response) {
+                $(destElem).text(response['info'])}).fail(function() {
+                $(destElem).text("{{ 'Error: Could not contact server.' }}");
+            });
+        }
+    </script>
+
+{% endblock %}
+
 {% block title %}
     {% if title %} {{ title }} - Microblog
     {% else %} Welcome - Microblog
@@ -25,6 +43,7 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li><a href="{{ url_for('index') }}">{{ ('Home') }}</a></li>
+                    <li><a href="{{ url_for('annotate') }}">{{ ('Annotate') }}</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_anonymous %}

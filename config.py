@@ -12,4 +12,6 @@ class Config():
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['noambox@gmail.com']
     PURCHASES_PER_PAGE = 10
+    ANNOTATIONS_PER_PAGE = 9
+    GOOGLE_MAPS_KEY = os.environ.get('PLACES_API')
 

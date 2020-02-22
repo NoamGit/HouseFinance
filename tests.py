@@ -25,6 +25,18 @@ class UserModelCase(unittest.TestCase):
                                          'd4c74594d841139328695756648b6bd6'
                                          '?d=identicon&s=128'))
 
+    def test_google_api(self):
+        import googlemaps
+        import os
+        API_KEY = os.environ.get('PLACES_API')
+        gmaps = googlemaps.Client(key=API_KEY)
+        res = gmaps.find_place(input="חומוס אבו אדהאם", input_type='textquery'
+                               , fields=['formatted_address', 'icon', 'name'
+                , 'permanently_closed'
+                , 'types'
+                , 'geometry/location'])
+        self.assertEqual('קרליבך 7, תל אביב יפו, 6713211, ישראל',res['candidates'][0]['formatted_address'])
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

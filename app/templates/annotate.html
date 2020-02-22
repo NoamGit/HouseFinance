@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+    {# for dynamic forms see https://github.com/bshelton/Dynamic-Forms/blob/master/templates/pages.html#}
+
+    <div class="containter">
+        <div class="row">
+            <div class="col-md-12">
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+                    {% set form_group = form|batch(2) %}
+                    {% for group in form_group %}
+                        {% set panelClass = 'panel--' ~ loop.index %}
+                            <span id={{ group[0].id }}>
+                                <div class="row">
+                                    {% if group[0].type == "HiddenField" %}
+                                        <div class="col-md-2">
+                                            <span id="purchase_name{{ group[0].id }}">
+                                                {{ wtf.form_field(group[0]) }}
+                                            </span>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <span id="purchase_category{{ group[1].id }}">
+                                                {{ wtf.form_field(group[1]) }}
+                                            </span>
+                                        </div>
+
+                                        <div class="col-md-5">
+                                        <span id="info{{ group[0].id }}">
+                                            <a href="javascript:findplace(
+                                            '#purchase_name{{ group[0].id }}',
+                                            '#info{{ group[0].id }}',
+                                            );" class="btn btn-info " role="button">More info</a>
+                                        </span>
+                                        </div>
+                                    {% endif %}
+
+                                {% if group[0].type == "SubmitField" %}
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-1">
+                                        {{ wtf.form_field(group[0]) }}
+                                    </div>
+                                {% endif %}
+                                </div>
+                            </span>
+                    {% endfor %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span> Next
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    Previous <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+{% endblock %}
+
+<!--This loops through each form passed in from flask
+     and renders the message and submit fields on the page-->
